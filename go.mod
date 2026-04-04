@@ -1,0 +1,3 @@
+module github.com/argform/baitfolio-backend
+
+go 1.21.3
