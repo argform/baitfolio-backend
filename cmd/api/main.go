@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	httptransport "github.com/argform/baitfolio-backend/internal/transport/http"
+)
 
 func main() {
-	fmt.Println("Let's go!")
+	r := httptransport.NewRouter()
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal(err)
+	}
 }
