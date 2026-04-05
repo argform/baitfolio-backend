@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: baitfolio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: baitfolio
+      POSTGRES_USER: baitfolio
+      POSTGRES_PASSWORD: baitfolio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgres/data
+
+volumes:
+  postgres_data:
