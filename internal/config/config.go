@@ -25,12 +25,12 @@ func Load() (*Config, error) {
 		AppEnv: getEnv("APP_ENV", "local"),
 		HTTPPort: getEnv("HTTP_PORT", "8080"),
 		Postgres: PostgresConfig{
-			Host:     getEnv("POSTGRES_HOST", "localhost"),
-			Port:     getEnv("POSTGRES_PORT", "5432"),
-			DB:       getEnv("POSTGRES_DB", "baitfolio"),
-			User:     getEnv("POSTGRES_USER", "baitfolio"),
+			Host: getEnv("POSTGRES_HOST", "localhost"),
+			Port: getEnv("POSTGRES_PORT", "5432"),
+			DB: getEnv("POSTGRES_DB", "baitfolio"),
+			User: getEnv("POSTGRES_USER", "baitfolio"),
 			Password: getEnv("POSTGRES_PASSWORD", "baitfolio"),
-			SSLMode:  getEnv("POSTGRES_SSLMODE", "disable"),
+			SSLMode: getEnv("POSTGRES_SSLMODE", "disable"),
 		},
 	}
 
