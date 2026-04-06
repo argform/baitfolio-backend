@@ -8,6 +8,7 @@ import (
 	"github.com/argform/baitfolio-backend/internal/auth"
 	"github.com/argform/baitfolio-backend/internal/service"
 	"github.com/argform/baitfolio-backend/internal/transport/http/handlers"
+	"github.com/argform/baitfolio-backend/internal/transport/http/middleware"
 )
 
 type Dependencies struct {
@@ -31,6 +32,7 @@ func NewRouter(deps Dependencies) *gin.Engine {
 	{
 		authGroup.POST("/register", authHandler.Register)
 		authGroup.POST("/login", authHandler.Login)
+		authGroup.GET("/me", middleware.Auth(deps.JWTManager), authHandler.GetMe)
 	}
 
 	return r

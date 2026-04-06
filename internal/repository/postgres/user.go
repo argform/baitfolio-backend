@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/argform/baitfolio-backend/internal/domain"
+	"github.com/argform/baitfolio-backend/internal/repository"
 )
 
 type PostgresUserRepository struct {
@@ -87,19 +88,19 @@ func (r *PostgresUserRepository) GetByEmail(ctx context.Context, email string) (
 	user, err := scanUser(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
+			return nil, repository.ErrUserNotFound
 		}
 		return nil, err
 	}
 	return user, nil
 }
 
-func (r *PostgresUserRepository) GetByID (ctx context.Context, id uint64) (*domain.User, error) { 
-	row := r.db.QueryRow(ctx, `SELECT * FROM users WHERE id = $1`, id)
+func (r *PostgresUserRepository) GetByID(ctx context.Context, id uint64) (*domain.User, error) {
+	row := r.db.QueryRow(ctx, `SELECT * FROM users WHERE user_id = $1`, id)
 	user, err := scanUser(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
+			return nil, repository.ErrUserNotFound
 		}
 		return nil, err
 	}

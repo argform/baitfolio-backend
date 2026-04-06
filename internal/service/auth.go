@@ -29,10 +29,14 @@ type LoginInput struct {
 	Password string
 }
 
+type MeInput struct {
+	Token string
+}
+
 func NewAuthService(users repository.UserRepository, jwt *auth.JWTManager) *AuthService {
 	return &AuthService{
 		users: users,
-		jwt:   jwt,
+		jwt: jwt,
 	}
 }
 
