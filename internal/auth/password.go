@@ -1,12 +1,18 @@
 package auth
 
 import (
+	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
 func HashPassword(password string) (string, error) {
-	bytes, error := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), error
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hash), nil
 }
 
 func ComparePassword(hash, password string) bool {
@@ -14,6 +20,14 @@ func ComparePassword(hash, password string) bool {
 	return err == nil
 }
 
-func ValidatePassword(password string, lenght int) (bool, string) {
-	panic("TODO: check password safety")
+func ValidatePassword(password string) error {
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	if len(password) > 64 {
+		return errors.New("password must be at most 64 characters long")
+	}
+
+	return nil
 }
