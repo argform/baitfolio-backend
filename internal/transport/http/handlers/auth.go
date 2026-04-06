@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/argform/baitfolio-backend/internal/domain"
 	"github.com/argform/baitfolio-backend/internal/service"
+	httpresponse "github.com/argform/baitfolio-backend/internal/transport/http/response"
 )
 
 type AuthHandler struct {
@@ -38,20 +40,31 @@ type TokenResponse struct {
 
 type UserResponse struct {
 	UserID uint64 `json:"user_id"`
-	Username string  `json:"username"`
-	Email string  `json:"email"`
+	Username string `json:"username"`
+	Email string `json:"email"`
 	FirstName *string `json:"first_name"`
 	LastName *string `json:"last_name"`
 	About *string `json:"about"`
+}
+
+func newUserResponse(user *domain.User) UserResponse {
+	safeUser := user.Sanitized()
+
+	return UserResponse{
+		UserID: safeUser.UserID,
+		Username: safeUser.Username,
+		Email: safeUser.Email,
+		FirstName: safeUser.FirstName,
+		LastName: safeUser.LastName,
+		About: safeUser.About,
+	}
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request body",
-		})
+		httpresponse.WriteError(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -64,9 +77,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		About: req.About,
 	})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		httpresponse.WriteError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -77,9 +88,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request body",
-		})
+		httpresponse.WriteError(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -88,9 +97,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Password: req.Password,
 	})
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
+		httpresponse.WriteError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
@@ -102,34 +109,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 func (h *AuthHandler) GetMe(c *gin.Context) {
 	userIDValue, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "missing user context",
-		})
+		httpresponse.WriteError(c, http.StatusBadRequest, "missing user context")
 		return
 	}
 
 	userID, ok := userIDValue.(uint64)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid user context",
-		})
+		httpresponse.WriteError(c, http.StatusBadRequest, "invalid user context")
 		return
 	}
 
 	user, err := h.authService.GetMe(c.Request.Context(), userID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
+		httpresponse.WriteError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, UserResponse{
-		UserID: user.UserID,
-		Username: user.Username,
-		Email: user.Email,
-		FirstName: user.FirstName,
-		LastName: user.LastName,
-		About: user.About,
-	})
+	c.JSON(http.StatusOK, newUserResponse(user))
 }

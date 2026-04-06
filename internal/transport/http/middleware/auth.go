@@ -7,24 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/argform/baitfolio-backend/internal/auth"
+	httpresponse "github.com/argform/baitfolio-backend/internal/transport/http/response"
 )
 
 func Auth(jwtManager *auth.JWTManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "missing authorization header",
-			})
+			httpresponse.WriteError(c, http.StatusUnauthorized, "missing authorization header")
 			c.Abort()
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid authorization header",
-			})
+			httpresponse.WriteError(c, http.StatusUnauthorized, "invalid authorization header")
 			c.Abort()
 			return
 		}
@@ -33,9 +30,7 @@ func Auth(jwtManager *auth.JWTManager) gin.HandlerFunc {
 
 		claims, err := jwtManager.ParseToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid token",
-			})
+			httpresponse.WriteError(c, http.StatusUnauthorized, "invalid token")
 			c.Abort()
 			return
 		}

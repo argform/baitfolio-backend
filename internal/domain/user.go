@@ -15,3 +15,8 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+func (u User) Sanitized() User {
+	u.PasswordHash = ""
+	return u
+}
