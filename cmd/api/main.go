@@ -29,12 +29,15 @@ func main() {
 	defer pool.Close()
 
 	userRepo := postgres.NewPostgresUserRepository(pool)
+	pointRepo := postgres.NewPostgresPointRepository(pool)
 	jwtManager := auth.NewJWTManager("super-secret-key", 7*24*time.Hour)
 	authService := service.NewAuthService(userRepo, jwtManager)
+	pointService := service.NewPointService(pointRepo)
 
 	router := httptransport.NewRouter(httptransport.Dependencies{
-		AuthService: authService,
-		JWTManager:  jwtManager,
+		AuthService:  authService,
+		PointService: pointService,
+		JWTManager:   jwtManager,
 	})
 
 	if err := router.Run(":" + cfg.HTTPPort); err != nil {

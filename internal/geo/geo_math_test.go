@@ -14,8 +14,8 @@ func almostEqual(a, b float64) bool {
 func TestXToLon(t *testing.T) {
 	tests := []struct {
 		name string
-		x    float64
-		n    float64
+		x float64
+		n float64
 		want float64
 	}{
 		{"left edge z0", 0, 1, -180},
@@ -40,8 +40,8 @@ func TestYToLat(t *testing.T) {
 
 	tests := []struct {
 		name string
-		y    float64
-		n    float64
+		y float64
+		n float64
 		want float64
 	}{
 		{"top edge z0", 0, 1, maxLat},

@@ -13,7 +13,8 @@ import (
 
 type Dependencies struct {
 	AuthService *service.AuthService
-	JWTManager  *auth.JWTManager
+	PointService *service.PointService
+	JWTManager *auth.JWTManager
 }
 
 func NewRouter(deps Dependencies) *gin.Engine {
@@ -27,12 +28,20 @@ func NewRouter(deps Dependencies) *gin.Engine {
 	})
 
 	authHandler := handlers.NewAuthHandler(deps.AuthService)
+	pointHandler := handlers.NewPointHandler(deps.PointService)
 
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/register", authHandler.Register)
 		authGroup.POST("/login", authHandler.Login)
 		authGroup.GET("/me", middleware.Auth(deps.JWTManager), authHandler.GetMe)
+	}
+
+	pointGroup := r.Group("/points")
+	{
+		pointGroup.POST("", middleware.Auth(deps.JWTManager), pointHandler.Create)
+		pointGroup.GET("/:id", pointHandler.GetByID)
+		pointGroup.GET("", pointHandler.GetAllInsideTile)
 	}
 
 	return r

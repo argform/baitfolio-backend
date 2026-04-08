@@ -32,14 +32,14 @@ func scanPoint(row pgx.Row) (*domain.Point, error) {
 		&point.Lat,
 		&point.Lon,
 		&point.CreatedAt,
-		&point.CreatedBy,
+		&point.UpdatedAt,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &point, err
+	return &point, nil
 }
 
 func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Point) (*domain.Point, error) {
@@ -67,7 +67,6 @@ func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Poin
 		r.db.QueryRow(
 			ctx,
 			query,
-			point.PointID,
 			point.CreatedBy,
 			point.Name,
 			point.Description,
@@ -83,7 +82,7 @@ func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Poin
 }
 
 func (r *PostgresPointRepository) GetByID(ctx context.Context, id uint64) (*domain.Point, error) {
-	row := r.db.QueryRow(ctx, `SELECT * FROM points WHERE id = $1`, id)
+	row := r.db.QueryRow(ctx, `SELECT * FROM points WHERE point_id = $1`, id)
 	point, err := scanPoint(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -112,7 +111,7 @@ func (r *PostgresPointRepository) GetAllInsideTile(ctx context.Context, t geo.Ti
 	if err != nil {
 		return nil, fmt.Errorf("get points inside tile: %w", err)
 	}
-	
+
 	defer rows.Close()
 
 	points := make([]*domain.Point, 0)
