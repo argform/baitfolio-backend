@@ -12,9 +12,10 @@ import (
 )
 
 type Dependencies struct {
-	AuthService *service.AuthService
-	PointService *service.PointService
-	JWTManager *auth.JWTManager
+	AuthService   *service.AuthService
+	PointService  *service.PointService
+	ReviewService *service.ReviewService
+	JWTManager    *auth.JWTManager
 }
 
 func NewRouter(deps Dependencies) *gin.Engine {
@@ -29,6 +30,7 @@ func NewRouter(deps Dependencies) *gin.Engine {
 
 	authHandler := handlers.NewAuthHandler(deps.AuthService)
 	pointHandler := handlers.NewPointHandler(deps.PointService)
+	reviewHandler := handlers.NewReviewHandler(deps.ReviewService)
 
 	authGroup := r.Group("/auth")
 	{
@@ -43,6 +45,14 @@ func NewRouter(deps Dependencies) *gin.Engine {
 		pointGroup.GET("/:id", pointHandler.GetByID)
 		pointGroup.GET("", pointHandler.GetAllInsideTile)
 	}
+
+	reviewGroup := r.Group("/reviews")
+	{
+		reviewGroup.POST("", middleware.Auth(deps.JWTManager), reviewHandler.Create)
+		reviewGroup.DELETE("/:id", middleware.Auth(deps.JWTManager), reviewHandler.Delete)
+	}
+
+	pointGroup.GET("/:pointID/reviews", reviewHandler.GetAllByPointID)
 
 	return r
 }

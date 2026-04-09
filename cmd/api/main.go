@@ -30,14 +30,17 @@ func main() {
 
 	userRepo := postgres.NewPostgresUserRepository(pool)
 	pointRepo := postgres.NewPostgresPointRepository(pool)
+	reviewRepo := postgres.NewPostgresReviewRepository(pool)
 	jwtManager := auth.NewJWTManager("super-secret-key", 7*24*time.Hour)
 	authService := service.NewAuthService(userRepo, jwtManager)
 	pointService := service.NewPointService(pointRepo)
+	reviewService := service.NewReviewService(reviewRepo)
 
 	router := httptransport.NewRouter(httptransport.Dependencies{
-		AuthService:  authService,
-		PointService: pointService,
-		JWTManager:   jwtManager,
+		AuthService:   authService,
+		PointService:  pointService,
+		ReviewService: reviewService,
+		JWTManager:    jwtManager,
 	})
 
 	if err := router.Run(":" + cfg.HTTPPort); err != nil {
