@@ -14,12 +14,15 @@ type PointService struct {
 }
 
 type CreatePointInput struct {
-	PointID uint64
-	CreatedBy *uint64
-	Name string
-	Description *string
-	Lat float64
-	Lon float64
+	PointID              uint64
+	CreatedBy            *uint64
+	Name                 string
+	Description          *string
+	Lat                  float64
+	Lon                  float64
+	WaterbodyHydrologyID *int32
+	ShoreTypeID          *int16
+	AccessTypeID         *int16
 }
 
 func NewPointService(points repository.PointRepository) *PointService {
@@ -30,11 +33,14 @@ func NewPointService(points repository.PointRepository) *PointService {
 
 func (s *PointService) Create(ctx context.Context, input CreatePointInput) (*domain.Point, error) {
 	point := &domain.Point{
-		CreatedBy:   input.CreatedBy,
-		Name:        input.Name,
-		Description: input.Description,
-		Lat:         input.Lat,
-		Lon:         input.Lon,
+		CreatedBy:            input.CreatedBy,
+		Name:                 input.Name,
+		Description:          input.Description,
+		Lat:                  input.Lat,
+		Lon:                  input.Lon,
+		WaterbodyHydrologyID: input.WaterbodyHydrologyID,
+		ShoreTypeID:          input.ShoreTypeID,
+		AccessTypeID:         input.AccessTypeID,
 	}
 
 	createdPoint, err := s.points.Create(ctx, point)

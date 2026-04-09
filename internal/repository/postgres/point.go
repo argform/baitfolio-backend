@@ -17,6 +17,20 @@ type PostgresPointRepository struct {
 	db *pgxpool.Pool
 }
 
+const pointColumns = `
+	point_id,
+	created_by,
+	name,
+	description,
+	lat,
+	lon,
+	waterbody_hydrology_id,
+	shore_type_id,
+	access_type_id,
+	created_at,
+	updated_at
+`
+
 func NewPostgresPointRepository(db *pgxpool.Pool) *PostgresPointRepository {
 	return &PostgresPointRepository{db: db}
 }
@@ -31,6 +45,9 @@ func scanPoint(row pgx.Row) (*domain.Point, error) {
 		&point.Description,
 		&point.Lat,
 		&point.Lon,
+		&point.WaterbodyHydrologyID,
+		&point.ShoreTypeID,
+		&point.AccessTypeID,
 		&point.CreatedAt,
 		&point.UpdatedAt,
 	)
@@ -49,19 +66,13 @@ func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Poin
 			name,
 			description,
 			lat,
-			lon
-		)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING
-			point_id,
-			created_by,
-			name,
-			description,
-			lat,
 			lon,
-			created_at,
-			updated_at
-	`
+			waterbody_hydrology_id,
+			shore_type_id,
+			access_type_id
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING ` + pointColumns
 
 	created, err := scanPoint(
 		r.db.QueryRow(
@@ -72,6 +83,9 @@ func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Poin
 			point.Description,
 			point.Lat,
 			point.Lon,
+			point.WaterbodyHydrologyID,
+			point.ShoreTypeID,
+			point.AccessTypeID,
 		),
 	)
 	if err != nil {
@@ -82,7 +96,7 @@ func (r *PostgresPointRepository) Create(ctx context.Context, point *domain.Poin
 }
 
 func (r *PostgresPointRepository) GetByID(ctx context.Context, id uint64) (*domain.Point, error) {
-	row := r.db.QueryRow(ctx, `SELECT * FROM points WHERE point_id = $1`, id)
+	row := r.db.QueryRow(ctx, `SELECT `+pointColumns+` FROM points WHERE point_id = $1`, id)
 	point, err := scanPoint(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -96,8 +110,8 @@ func (r *PostgresPointRepository) GetByID(ctx context.Context, id uint64) (*doma
 func (r *PostgresPointRepository) GetAllInsideTile(ctx context.Context, t geo.Tile) ([]*domain.Point, error) {
 	bbox := geo.TileToBBox(t)
 	query := `
-		SELECT * FROM points
-		WHERE (lat BETWEEN $1 AND $2) 
+		SELECT ` + pointColumns + ` FROM points
+		WHERE (lat BETWEEN $1 AND $2)
 			AND (lon BETWEEN $3 AND $4)
 	`
 	rows, err := r.db.Query(

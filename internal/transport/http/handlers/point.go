@@ -25,29 +25,38 @@ func NewPointHandler(pointService *service.PointService) *PointHandler {
 }
 
 type CreatePointRequest struct {
-	Name string `json:"name"`
-	Description *string `json:"description"`
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	Name                 string  `json:"name"`
+	Description          *string `json:"description"`
+	Lat                  float64 `json:"lat"`
+	Lon                  float64 `json:"lon"`
+	WaterbodyHydrologyID *int32  `json:"waterbody_hydrology_id"`
+	ShoreTypeID          *int16  `json:"shore_type_id"`
+	AccessTypeID         *int16  `json:"access_type_id"`
 }
 
 type PointResponse struct {
-	PointID uint64 `json:"point_id"`
-	CreatedBy *uint64 `json:"created_by"`
-	Name string `json:"name"`
-	Description *string `json:"description"`
-	Lat float64 `json:"lat"`
-	Lon float64 `json:"lon"`
+	PointID              uint64  `json:"point_id"`
+	CreatedBy            *uint64 `json:"created_by"`
+	Name                 string  `json:"name"`
+	Description          *string `json:"description"`
+	Lat                  float64 `json:"lat"`
+	Lon                  float64 `json:"lon"`
+	WaterbodyHydrologyID *int32  `json:"waterbody_hydrology_id"`
+	ShoreTypeID          *int16  `json:"shore_type_id"`
+	AccessTypeID         *int16  `json:"access_type_id"`
 }
 
 func newPointResponse(point *domain.Point) PointResponse {
 	return PointResponse{
-		PointID:     point.PointID,
-		CreatedBy:   point.CreatedBy,
-		Name:        point.Name,
-		Description: point.Description,
-		Lat:         point.Lat,
-		Lon:         point.Lon,
+		PointID:              point.PointID,
+		CreatedBy:            point.CreatedBy,
+		Name:                 point.Name,
+		Description:          point.Description,
+		Lat:                  point.Lat,
+		Lon:                  point.Lon,
+		WaterbodyHydrologyID: point.WaterbodyHydrologyID,
+		ShoreTypeID:          point.ShoreTypeID,
+		AccessTypeID:         point.AccessTypeID,
 	}
 }
 
@@ -71,11 +80,14 @@ func (h *PointHandler) Create(c *gin.Context) {
 	}
 
 	point, err := h.pointService.Create(c.Request.Context(), service.CreatePointInput{
-		CreatedBy:   &userID,
-		Name:        req.Name,
-		Description: req.Description,
-		Lat:         req.Lat,
-		Lon:         req.Lon,
+		CreatedBy:            &userID,
+		Name:                 req.Name,
+		Description:          req.Description,
+		Lat:                  req.Lat,
+		Lon:                  req.Lon,
+		WaterbodyHydrologyID: req.WaterbodyHydrologyID,
+		ShoreTypeID:          req.ShoreTypeID,
+		AccessTypeID:         req.AccessTypeID,
 	})
 	if err != nil {
 		httpresponse.WriteError(c, http.StatusBadRequest, err.Error())
